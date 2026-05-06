@@ -1,3 +1,15 @@
+/*
+ * ================================= READ THIS PART ================================= 
+ * 
+ * I HAVE ALREADY EDITED THIS IN ORDER FOR THIS TO WORK WITH THE GUI I HAVE DESIGNED.
+ * PLEASE DO NOT EDIT ANYTHING WITHOUT:
+ * 1) Putting a comment with the words "edited", e.g. "// edited" to make searching for your edit easier
+ * 2) Notifying me through email so I can know if anything crucial needs to be addressed.
+ *
+ * Thanks!
+ */
+
+
 import java.util.*;
 import java.io.*;
 
