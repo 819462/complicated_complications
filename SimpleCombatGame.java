@@ -93,7 +93,7 @@ public class SimpleCombatGame {
                     playerTeam[i] = availableChars.remove(choice - 1);
                     break;
                 } else {
-                    out.print("Invalid choice. Try again: ");
+                    out.println("Invalid choice. Try again: ");
                 }
             }
         }
@@ -145,7 +145,7 @@ public class SimpleCombatGame {
                     out.println(p.name + " equipped " + p.item + "\n");
                     break;
                 } else {
-                    out.print("Invalid choice. Try again: ");
+                    out.println("Invalid choice. Try again: ");
                 }
             }
         }
@@ -245,7 +245,7 @@ public class SimpleCombatGame {
                 continue;
             }
             if (choice == 1) {
-                out.print("Target (1 or 2): ");
+                out.println("Target (1 or 2): ");
                 int t = sc.nextInt() - 1;
                 if (t >= 0 && t < 2 && enemies[t].isAlive) {
                     p.plannedAction = 1;
@@ -258,7 +258,7 @@ public class SimpleCombatGame {
             } else if (choice == 3 && !p.item.isEmpty()) {
                 // For Blow Dart, select target now
                 if (p.item.equals("Blow Dart") && p.blowDartUsesLeft > 0) {
-                    out.print("Blow Dart target (1 or 2): ");
+                    out.println("Blow Dart target (1 or 2): ");
                     int t = sc.nextInt() - 1;
                     if (t >= 0 && t < 2 && enemies[t].isAlive) {
                         p.plannedBlowDartTarget = enemies[t];
