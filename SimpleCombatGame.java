@@ -6,7 +6,7 @@
  * 1) Putting a comment with the words "edited", e.g. "// edited" to make searching for your edit easier
  * 2) Notifying me through email so I can know if anything crucial needs to be addressed.
  *
- * Thanks!
+ * Thanks! ♡
  */
 
 
