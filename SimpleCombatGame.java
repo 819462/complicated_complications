@@ -1,4 +1,5 @@
 import java.util.*;
+import java.io.*;
 
 public class SimpleCombatGame {
     static Scanner sc;
