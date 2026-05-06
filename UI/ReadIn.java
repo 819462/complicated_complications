@@ -9,7 +9,6 @@ public class ReadIn implements Runnable {
         this.gui = gui;
     }
 
-    @Override
     public void run() {
         try {
             String line;
