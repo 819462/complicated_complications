@@ -1,7 +1,8 @@
 import java.util.*;
 
 public class SimpleCombatGame {
-    static Scanner sc = new Scanner(System.in);
+    static Scanner sc;
+    static PrintStream out;
     static Random rand = new Random();
 
     static class Character {
@@ -21,7 +22,7 @@ public class SimpleCombatGame {
             name = n; 
             maxHp = hp = h; 
             speed = s; 
-            ultMax = uMax; 
+            ultMax = uMax;
             ultName = u;
             ultCharge = 0; 
             isAlive = true; 
@@ -37,16 +38,22 @@ public class SimpleCombatGame {
     }
 
     static void clearScreen() {
-        for (int i = 0; i < 50; i++) System.out.println();
+        for (int i = 0; i < 50; i++) out.println();
+    }
+
+    public static void init(InputStream in, PrintStream outStream)
+    {
+        sc = new Scanner(in);
+        out = outStream;
     }
 
     static void pause() {
-        System.out.println("\nPress Enter to continue...");
+        out.println("\nPress Enter to continue...");
         sc.nextLine();
     }
 
     public static void main(String[] args) {
-        System.out.println("=== TURN-BASED COMBAT GAME ===\n");
+        out.println("=== TURN-BASED COMBAT GAME ===\n");
 
         Character knight = new Character("Knight", 250, 2, 2, "Counter");
         Character robot  = new Character("Robot",  300, 1, 3, "Rocket");
@@ -60,11 +67,11 @@ public class SimpleCombatGame {
 
         for (int i = 0; i < 2; i++) {
             while (true) {
-                System.out.println("\nChoose character " + (i+1) + " for your team:");
+                out.println("\nChoose character " + (i+1) + " for your team:");
                 for (int j = 0; j < availableChars.size(); j++) {
-                    System.out.println((j+1) + ") " + availableChars.get(j).name);
+                    out.println((j+1) + ") " + availableChars.get(j).name);
                 }
-                System.out.println("0) Description");
+                out.println("0) Description");
                 int choice = sc.nextInt();
                 if (choice == 0) {
                     showCharacterDescriptions();
@@ -73,7 +80,7 @@ public class SimpleCombatGame {
                     playerTeam[i] = availableChars.remove(choice - 1);
                     break;
                 } else {
-                    System.out.print("Invalid choice. Try again: ");
+                    out.print("Invalid choice. Try again: ");
                 }
             }
         }
@@ -90,18 +97,18 @@ public class SimpleCombatGame {
         for (Character c : aiTeam)   c.name = "X's " + c.name;
 
         // === DISPLAY TEAMS ===
-        System.out.println("\n=== TEAMS ===");
-        System.out.println("YOUR TEAM:");
+        out.println("\n=== TEAMS ===");
+        out.println("YOUR TEAM:");
         for (int i = 0; i < 2; i++) {
-            System.out.println("  " + (i+1) + ". " + playerTeam[i].name + 
+            out.println("  " + (i+1) + ". " + playerTeam[i].name + 
                              " (HP: " + playerTeam[i].hp + ", Speed: " + playerTeam[i].speed + ")");
         }
-        System.out.println("ENEMY TEAM:");
+        out.println("ENEMY TEAM:");
         for (int i = 0; i < 2; i++) {
-            System.out.println("  " + (i+1) + ". " + aiTeam[i].name + 
+            out.println("  " + (i+1) + ". " + aiTeam[i].name + 
                              " (HP: " + aiTeam[i].hp + ", Speed: " + aiTeam[i].speed + ")");
         }
-        System.out.println("==============================\n");
+        out.println("==============================\n");
 
         // ITEM SELECTION
         String[] allItems = {"Shield", "Potion", "Knife", "Boots", "Blow Dart"};
@@ -109,11 +116,11 @@ public class SimpleCombatGame {
 
         for (Character p : playerTeam) {
             while (true) {
-                System.out.println(p.name + " - choose item:");
+                out.println(p.name + " - choose item:");
                 for (int i = 0; i < availableItems.size(); i++) {
-                    System.out.println((i+1) + ") " + availableItems.get(i));
+                    out.println((i+1) + ") " + availableItems.get(i));
                 }
-                System.out.println("0) Description");
+                out.println("0) Description");
                 
                 int choice = sc.nextInt();
                 if (choice == 0) {
@@ -122,10 +129,10 @@ public class SimpleCombatGame {
                 } else if (choice >= 1 && choice <= availableItems.size()) {
                     p.item = availableItems.remove(choice - 1);
                     if (p.item.equals("Blow Dart")) p.blowDartUsesLeft = 3;
-                    System.out.println(p.name + " equipped " + p.item + "\n");
+                    out.println(p.name + " equipped " + p.item + "\n");
                     break;
                 } else {
-                    System.out.print("Invalid choice. Try again: ");
+                    out.print("Invalid choice. Try again: ");
                 }
             }
         }
@@ -135,22 +142,22 @@ public class SimpleCombatGame {
             if (bothDead(playerTeam)) { 
                 clearScreen();
                 printStatus(playerTeam, aiTeam);
-                System.out.println("\n⚔️ GAME OVER - You lost... ⚔️"); 
+                out.println("\n⚔️ GAME OVER - You lost... ⚔️"); 
                 break; 
             }
             if (bothDead(aiTeam)) { 
                 clearScreen();
                 printStatus(playerTeam, aiTeam);
-                System.out.println("\n⚔️ VICTORY - You won! ⚔️"); 
+                out.println("\n⚔️ VICTORY - You won! ⚔️"); 
                 break; 
             }
 
             // === PLANNING PHASE ===
             clearScreen();
             printStatus(playerTeam, aiTeam);
-            System.out.println("\n╔══════════════════════════════════════════╗");
-            System.out.println("║     PLANNING PHASE - Choose Actions      ║");
-            System.out.println("╚══════════════════════════════════════════╝");
+            out.println("\n╔══════════════════════════════════════════╗");
+            out.println("║     PLANNING PHASE - Choose Actions      ║");
+            out.println("╚══════════════════════════════════════════╝");
             planPlayerActions(playerTeam, aiTeam);
             planAIActions(aiTeam, playerTeam);
 
@@ -160,9 +167,9 @@ public class SimpleCombatGame {
             // === BATTLE PHASE ===
             clearScreen();
             printStatus(playerTeam, aiTeam);
-            System.out.println("\n╔══════════════════════════════════════════╗");
-            System.out.println("║            BATTLE PHASE                  ║");
-            System.out.println("╚══════════════════════════════════════════╝\n");
+            out.println("\n╔══════════════════════════════════════════╗");
+            out.println("║            BATTLE PHASE                  ║");
+            out.println("╚══════════════════════════════════════════╝\n");
             Character[] order = getTurnOrder(playerTeam, aiTeam);
 
             for (Character c : order) {
@@ -173,7 +180,7 @@ public class SimpleCombatGame {
                 // Blow Dart 50% fail chance
                 if (c.dartTurns > 0) {
                     if (rand.nextBoolean()) {
-                        System.out.println(c.name + "'s action failed due to Blow Dart!");
+                        out.println(c.name + "'s action failed due to Blow Dart!");
                         c.dartTurns--;
                         continue;
                     } else {
@@ -187,7 +194,7 @@ public class SimpleCombatGame {
             sc.nextLine(); // consume newline
             pause();
 
-            System.out.println("\n--- End of Turn ---");
+            out.println("\n--- End of Turn ---");
             tickStatuses(playerTeam);
             tickStatuses(aiTeam);
             chargeUltimates(playerTeam);
@@ -214,10 +221,10 @@ public class SimpleCombatGame {
         p.plannedBlowDartTarget = null;
 
         while (true) {
-            System.out.println("\n→ Planning for " + p.name + " (" + p.hp + " HP) | Ult: " + p.ultCharge + "/" + p.ultMax);
-            if (p.blowDartUsesLeft > 0) System.out.println("Blow Dart uses left: " + p.blowDartUsesLeft);
+            out.println("\n→ Planning for " + p.name + " (" + p.hp + " HP) | Ult: " + p.ultCharge + "/" + p.ultMax);
+            if (p.blowDartUsesLeft > 0) out.println("Blow Dart uses left: " + p.blowDartUsesLeft);
 
-            System.out.println("1) Attack  2) Ultimate  3) Item  4) Nothing  5) Description");
+            out.println("1) Attack  2) Ultimate  3) Item  4) Nothing  5) Description");
             int choice = sc.nextInt();
 
             if (choice == 5) {
@@ -225,7 +232,7 @@ public class SimpleCombatGame {
                 continue;
             }
             if (choice == 1) {
-                System.out.print("Target (1 or 2): ");
+                out.print("Target (1 or 2): ");
                 int t = sc.nextInt() - 1;
                 if (t >= 0 && t < 2 && enemies[t].isAlive) {
                     p.plannedAction = 1;
@@ -238,14 +245,14 @@ public class SimpleCombatGame {
             } else if (choice == 3 && !p.item.isEmpty()) {
                 // For Blow Dart, select target now
                 if (p.item.equals("Blow Dart") && p.blowDartUsesLeft > 0) {
-                    System.out.print("Blow Dart target (1 or 2): ");
+                    out.print("Blow Dart target (1 or 2): ");
                     int t = sc.nextInt() - 1;
                     if (t >= 0 && t < 2 && enemies[t].isAlive) {
                         p.plannedBlowDartTarget = enemies[t];
                         p.plannedAction = 3;
                         break;
                     } else {
-                        System.out.println("Invalid target.");
+                        out.println("Invalid target.");
                         continue;
                     }
                 }
@@ -255,7 +262,7 @@ public class SimpleCombatGame {
                 p.plannedAction = 4;
                 break;
             } else {
-                System.out.println("Invalid choice.");
+                out.println("Invalid choice.");
             }
         }
     }
@@ -301,36 +308,36 @@ public class SimpleCombatGame {
                 useItem(c, enemySide);
                 break;
             case 4:
-                System.out.println(c.name + " does nothing.");
+                out.println(c.name + " does nothing.");
                 break;
         }
     }
 
     // ==================== DESCRIPTION MENUS ====================
     static void showCharacterDescriptions() {
-        System.out.println("\n=== CHARACTER DESCRIPTIONS ===");
-        System.out.println("Knight - 250 HP, Speed 2, Base Damage: 30, Ult (2 charges): Counter (2.5x reflect on attack)");
-        System.out.println("Robot  - 300 HP, Speed 1, Base Damage: 35, Ult (3 charges): Rocket (50 damage to both enemies)");
-        System.out.println("Witch  - 200 HP, Speed 3, Base Damage: 20, Ult (5 charges): Revive (dead ally returns with 50 HP, or heal living ally 20 HP)");
-        System.out.println("\nPress Enter to return...");
+        out.println("\n=== CHARACTER DESCRIPTIONS ===");
+        out.println("Knight - 250 HP, Speed 2, Base Damage: 30, Ult (2 charges): Counter (2.5x reflect on attack)");
+        out.println("Robot  - 300 HP, Speed 1, Base Damage: 35, Ult (3 charges): Rocket (50 damage to both enemies)");
+        out.println("Witch  - 200 HP, Speed 3, Base Damage: 20, Ult (5 charges): Revive (dead ally returns with 50 HP, or heal living ally 20 HP)");
+        out.println("\nPress Enter to return...");
         sc.nextLine(); sc.nextLine();
     }
 
     static void showItemDescriptions() {
-        System.out.println("\n=== ITEM DESCRIPTIONS ===");
-        System.out.println("Shield     - Blocks all damage this turn (no counter)");
-        System.out.println("Potion     - Heals 40 HP");
-        System.out.println("Knife      - +50% damage for 2 turns");
-        System.out.println("Boots      - +2 Speed permanently");
-        System.out.println("Blow Dart  - Target enemy (3 uses total) | 50% chance their action fails for 3 turns");
-        System.out.println("\nPress Enter to return...");
+        out.println("\n=== ITEM DESCRIPTIONS ===");
+        out.println("Shield     - Blocks all damage this turn (no counter)");
+        out.println("Potion     - Heals 40 HP");
+        out.println("Knife      - +50% damage for 2 turns");
+        out.println("Boots      - +2 Speed permanently");
+        out.println("Blow Dart  - Target enemy (3 uses total) | 50% chance their action fails for 3 turns");
+        out.println("\nPress Enter to return...");
         sc.nextLine(); sc.nextLine();
     }
 
     static void showHelpMenu() {
-        System.out.println("\n=== DESCRIPTION MENU ===");
-        System.out.println("1) Characters");
-        System.out.println("2) Items");
+        out.println("\n=== DESCRIPTION MENU ===");
+        out.println("1) Characters");
+        out.println("2) Items");
         int ch = sc.nextInt();
         if (ch == 1) showCharacterDescriptions();
         else if (ch == 2) showItemDescriptions();
@@ -378,7 +385,7 @@ public class SimpleCombatGame {
             if (c.poisonTurns > 0) {
                 c.hp -= 10;
                 c.poisonTurns--;
-                System.out.println(c.name + " takes 10 poison damage!");
+                out.println(c.name + " takes 10 poison damage!");
             }
             if (c.knifeTurns > 0) c.knifeTurns--;
             if (c.hp <= 0) { 
@@ -389,26 +396,26 @@ public class SimpleCombatGame {
     }
 
     static void printStatus(Character[] pTeam, Character[] eTeam) {
-        System.out.println("\n=== STATUS ===");
-        System.out.print("YOUR TEAM: ");
+        out.println("\n=== STATUS ===");
+        out.print("YOUR TEAM: ");
         for (Character c : pTeam) {
-            System.out.print(c.name + " (" + c.hp + "/" + c.maxHp + " HP)");
-            if (c.poisonTurns > 0) System.out.print(" [Poison:" + c.poisonTurns + "]");
-            if (c.knifeTurns > 0) System.out.print(" [Knife:" + c.knifeTurns + "]");
-            if (c.dartTurns > 0) System.out.print(" [BlowDart:" + c.dartTurns + "]");
-            if (c.protectedThisTurn) System.out.print(" [Shield:1]");
-            System.out.print("  ");
+            out.print(c.name + " (" + c.hp + "/" + c.maxHp + " HP)");
+            if (c.poisonTurns > 0) out.print(" [Poison:" + c.poisonTurns + "]");
+            if (c.knifeTurns > 0) out.print(" [Knife:" + c.knifeTurns + "]");
+            if (c.dartTurns > 0) out.print(" [BlowDart:" + c.dartTurns + "]");
+            if (c.protectedThisTurn) out.print(" [Shield:1]");
+            out.print("  ");
         }
-        System.out.print("\nENEMY TEAM: ");
+        out.print("\nENEMY TEAM: ");
         for (Character c : eTeam) {
-            System.out.print(c.name + " (" + c.hp + "/" + c.maxHp + " HP)");
-            if (c.poisonTurns > 0) System.out.print(" [Poison:" + c.poisonTurns + "]");
-            if (c.knifeTurns > 0) System.out.print(" [Knife:" + c.knifeTurns + "]");
-            if (c.dartTurns > 0) System.out.print(" [BlowDart:" + c.dartTurns + "]");
-            if (c.protectedThisTurn) System.out.print(" [Shield:1]");
-            System.out.print("  ");
+            out.print(c.name + " (" + c.hp + "/" + c.maxHp + " HP)");
+            if (c.poisonTurns > 0) out.print(" [Poison:" + c.poisonTurns + "]");
+            if (c.knifeTurns > 0) out.print(" [Knife:" + c.knifeTurns + "]");
+            if (c.dartTurns > 0) out.print(" [BlowDart:" + c.dartTurns + "]");
+            if (c.protectedThisTurn) out.print(" [Shield:1]");
+            out.print("  ");
         }
-        System.out.println("\n");
+        out.println("\n");
     }
 
     // ==================== ATTACK ====================
@@ -420,14 +427,14 @@ public class SimpleCombatGame {
             if (target.counterMode) {
                 int counterDmg = (int)(dmg * 2.5);
                 attacker.hp -= counterDmg;
-                System.out.println(target.name + " COUNTERS! " + attacker.name + " takes " + counterDmg + " damage!");
+                out.println(target.name + " COUNTERS! " + attacker.name + " takes " + counterDmg + " damage!");
                 checkDeath(attacker);
             } else {
-                System.out.println(target.name + "'s Shield blocks the attack! No damage taken.");
+                out.println(target.name + "'s Shield blocks the attack! No damage taken.");
             }
         } else {
             target.hp -= dmg;
-            System.out.println(attacker.name + " hits " + target.name + " for " + dmg + " damage!");
+            out.println(attacker.name + " hits " + target.name + " for " + dmg + " damage!");
             if (attacker.name.contains("Witch")) target.poisonTurns = 3;
             checkDeath(target);
         }
@@ -445,16 +452,16 @@ public class SimpleCombatGame {
 
     // ==================== ULTIMATES ====================
     static void useUltimate(Character c, Character[] enemies, Character[] ownTeam) {
-        System.out.println(c.name + " uses " + c.ultName + "!");
+        out.println(c.name + " uses " + c.ultName + "!");
         
         if (c.name.contains("Knight")) {
             c.protectedThisTurn = true;
             c.counterMode = true;
-            System.out.println(c.name + " prepares to counter! Next attack will be reflected 2.5x!");
+            out.println(c.name + " prepares to counter! Next attack will be reflected 2.5x!");
         } else if (c.name.contains("Robot")) {
             for (Character t : enemies) if (t.isAlive) { 
                 t.hp -= 50; 
-                System.out.println("Rocket hits " + t.name + " for 50 damage!");
+                out.println("Rocket hits " + t.name + " for 50 damage!");
                 checkDeath(t); 
             }
         } else if (c.name.contains("Witch")) {
@@ -464,7 +471,7 @@ public class SimpleCombatGame {
                     t.hp = 50;
                     t.isAlive = true;
                     t.poisonTurns = t.knifeTurns = t.dartTurns = 0;
-                    System.out.println(t.name + " has been revived with 50 HP!");
+                    out.println(t.name + " has been revived with 50 HP!");
                     return;
                 }
             }
@@ -473,45 +480,45 @@ public class SimpleCombatGame {
                 if (t.isAlive && t != c) {
                     t.hp += 20;
                     if (t.hp > t.maxHp) t.hp = t.maxHp;
-                    System.out.println(t.name + " is healed for 20 HP!");
+                    out.println(t.name + " is healed for 20 HP!");
                     return;
                 }
             }
             // If only the witch is alive, heal self
             c.hp += 20;
             if (c.hp > c.maxHp) c.hp = c.maxHp;
-            System.out.println(c.name + " heals self for 20 HP!");
+            out.println(c.name + " heals self for 20 HP!");
         }
     }
 
     // ==================== ITEMS ====================
     static void useItem(Character user, Character[] enemies) {
-        System.out.println(user.name + " uses " + user.item + "!");
+        out.println(user.name + " uses " + user.item + "!");
         switch (user.item) {
             case "Potion" -> { 
                 user.hp += 40; 
                 if (user.hp > user.maxHp) user.hp = user.maxHp;
-                System.out.println(user.name + " heals for 40 HP!");
+                out.println(user.name + " heals for 40 HP!");
             }
             case "Shield" -> {
                 user.protectedThisTurn = true;
-                System.out.println(user.name + " raises their shield!");
+                out.println(user.name + " raises their shield!");
             }
             case "Knife"  -> {
                 user.knifeTurns = 2;
-                System.out.println(user.name + " sharpens their knife! +50% damage for 2 turns!");
+                out.println(user.name + " sharpens their knife! +50% damage for 2 turns!");
             }
             case "Boots"  -> {
                 user.speed += 2;
-                System.out.println(user.name + " puts on boots! Speed increased by 2 permanently!");
+                out.println(user.name + " puts on boots! Speed increased by 2 permanently!");
             }
             case "Blow Dart" -> {
                 if (user.blowDartUsesLeft > 0 && user.plannedBlowDartTarget != null && user.plannedBlowDartTarget.isAlive) {
                     user.plannedBlowDartTarget.dartTurns = 3;
-                    System.out.println("Blow Dart hits " + user.plannedBlowDartTarget.name + "! 50% action failure for 3 turns!");
+                    out.println("Blow Dart hits " + user.plannedBlowDartTarget.name + "! 50% action failure for 3 turns!");
                     user.blowDartUsesLeft--;
                     if (user.blowDartUsesLeft == 0) {
-                        System.out.println("Blow Dart has broken!");
+                        out.println("Blow Dart has broken!");
                         user.item = "";
                     }
                 }
@@ -524,7 +531,7 @@ public class SimpleCombatGame {
         if (c.hp <= 0) { 
             c.hp = 0; 
             c.isAlive = false; 
-            System.out.println(c.name + " has been defeated!"); 
+            out.println(c.name + " has been defeated!"); 
         }
     }
 }
