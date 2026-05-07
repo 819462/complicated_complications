@@ -67,13 +67,11 @@ public class GUICentral {
     }
 
     private void buildBattleScreen() {
-        // Remove old battle panel if exists (Play Again)
         if (battlePanel != null) mainPanel.remove(battlePanel);
 
         battlePanel = new JPanel(new BorderLayout());
         battlePanel.setBackground(new Color(20, 20, 40));
 
-        // --- HP BARS (North) ---
         JPanel hpPanel = new JPanel(new GridLayout(2, 1, 4, 4));
         hpPanel.setBackground(new Color(30, 30, 50));
         hpPanel.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
@@ -102,7 +100,6 @@ public class GUICentral {
         hpPanel.add(enemyRow);
         battlePanel.add(hpPanel, BorderLayout.NORTH);
 
-        // --- BATTLE LOG (Center) ---
         battleLog = new JTextArea();
         battleLog.setEditable(false);
         battleLog.setFont(new Font("Monospaced", Font.PLAIN, 13));
@@ -113,7 +110,6 @@ public class GUICentral {
         JScrollPane scroll = new JScrollPane(battleLog);
         battlePanel.add(scroll, BorderLayout.CENTER);
 
-        // --- BUTTON PANEL (South) ---
         buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 12));
         buttonPanel.setBackground(new Color(30, 30, 50));
         buttonPanel.setPreferredSize(new Dimension(820, 85));
@@ -122,13 +118,13 @@ public class GUICentral {
         mainPanel.add(battlePanel, "battle");
     }
 
-    // ==================== START GAME ====================
-
-    private void startGame() {
+    private void startGame() 
+    {
         buildBattleScreen();
         cardLayout.show(mainPanel, "battle");
 
-        try {
+        try 
+        {
             PipedOutputStream guiToGame = new PipedOutputStream();
             PipedInputStream  gameIn    = new PipedInputStream(guiToGame);
 
@@ -153,12 +149,10 @@ public class GUICentral {
         }
     }
 
-    // ==================== CALLED BY READIN ====================
-
+// ReadIn calls these
     public void log(String line) {
         SwingUtilities.invokeLater(() -> {
             battleLog.append(line + "\n");
-            // Auto-scroll to bottom
             battleLog.setCaretPosition(battleLog.getDocument().getLength());
         });
     }
@@ -168,7 +162,6 @@ public class GUICentral {
             clearButtons();
             for (int i = 0; i < options.size(); i++) {
                 final int choice = i + 1;
-                // Strip "1) " prefix to get just the name
                 String label = options.get(i).replaceAll("^[0-9]+\\)\\s*", "");
                 buttonPanel.add(styledButton(label, 14, () -> sendAndClear(String.valueOf(choice))));
             }
@@ -205,7 +198,6 @@ public class GUICentral {
             clearButtons();
             for (int i = 0; i < 2; i++) {
                 final int choice = i + 1;
-                // Show actual enemy name from HP bar labels if available
                 String name = enemyLabels[i].getText().equals("---")
                     ? "Enemy " + choice
                     : enemyLabels[i].getText();
@@ -250,11 +242,7 @@ public class GUICentral {
         SwingUtilities.invokeLater(() -> parseAndApplyHP(data, enemyLabels, enemyBars));
     }
 
-    // ==================== HP PARSING ====================
-
     private void parseAndApplyHP(String text, JLabel[] labels, JProgressBar[] bars) {
-        // Input: "O's Knight (180/250 HP) [Poison:2]  O's Robot (300/300 HP)"
-        // Split on 2+ spaces to separate characters
         String[] parts = text.split("  +");
         int idx = 0;
         for (String part : parts) {
@@ -263,7 +251,6 @@ public class GUICentral {
 
             int paren = part.indexOf("(");
             int slash = part.indexOf("/", paren);
-            // " HP)" might have status tags after, find just the digits
             int hpEnd = part.indexOf(" HP)", slash);
             if (paren < 0 || slash < 0 || hpEnd < 0) continue;
 
@@ -285,8 +272,6 @@ public class GUICentral {
             } catch (NumberFormatException ignored) {}
         }
     }
-
-    // ==================== HELPERS ====================
 
     private void clearButtons() {
         buttonPanel.removeAll();
@@ -319,21 +304,17 @@ public class GUICentral {
         return b;
     }
 
-    // Button with no action (for layout)
     private JButton styledButton(String label, int fontSize) {
         JButton b = new JButton(label);
         b.setFont(new Font("Arial", Font.BOLD, fontSize));
         return b;
     }
 
-    // Button with action
     private JButton styledButton(String label, int fontSize, Runnable action) {
         JButton b = styledButton(label, fontSize);
         b.addActionListener(e -> action.run());
         return b;
     }
-
-    // ==================== ENTRY POINT ====================
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new GUICentral());
