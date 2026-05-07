@@ -29,7 +29,7 @@ public class GUICentral {
     // ==================== SETUP ====================
 
     public GUICentral() {
-        frame = new JFrame("Turn-Based Combat Game");
+        frame = new JFrame("Oliver's, Ryan's, Sophia's Simple Combat Game");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(820, 620);
         frame.setLocationRelativeTo(null);
@@ -50,13 +50,13 @@ public class GUICentral {
         g.gridx = 0;
         g.insets = new Insets(25, 0, 25, 0);
 
-        JLabel heading = new JLabel("⚔  TURN-BASED COMBAT  ⚔");
+        JLabel heading = new JLabel("Please Press Play, Please");
         heading.setFont(new Font("Serif", Font.BOLD, 34));
         heading.setForeground(Color.WHITE);
         g.gridy = 0;
         title.add(heading, g);
 
-        JButton play = styledButton("PLAY", 18);
+        JButton play = styledButton("PLAY (pls)", 18);
         play.setPreferredSize(new Dimension(150, 50));
         play.addActionListener(e -> startGame());
         g.gridy = 1;
@@ -227,12 +227,12 @@ public class GUICentral {
         SwingUtilities.invokeLater(() -> {
             clearButtons();
 
-            JLabel result = new JLabel(won ? "🏆  VICTORY!" : "💀  GAME OVER");
+            JLabel result = new JLabel(won ? "VICTORY!!" : "You Lost :(");
             result.setFont(new Font("Arial", Font.BOLD, 22));
             result.setForeground(won ? Color.GREEN : Color.RED);
             buttonPanel.add(result);
 
-            buttonPanel.add(styledButton("Play Again", 14, () -> {
+            buttonPanel.add(styledButton("Try Again", 14, () -> {
                 cardLayout.show(mainPanel, "title");
             }));
 
