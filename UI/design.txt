@@ -1,8 +1,0 @@
-To allow for minimal changes to the original console-based game, we would need to get creative. 
-The following is the layout I have came up with:
-
-- ReadIn.java: Runs on its own threat, continuously reads whatever SimpleCombatGame.java prints, parses, and calls methods on GUICentral.java to update the display.
-- WriteOut.java: Waits for GUICentral.java to tell it what the player chose, then writes it into the program as the "input".
-- GUICentral.java: Controls the Swing window, holds references to both ReadIn and WriteOut, renders everything, and more. When a button is clicked, it calls WriteOut. When ReadIn parses something, it 
-updates the UI.
-- SimpleCombatGame.java: Only change needed her is to swap hardcoded System.in / System.out for injectable streams.
