@@ -15,8 +15,10 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -95,13 +97,15 @@ public class CombatGameGUI
         outputArea = new JTextArea();
         outputArea.setEditable(false);
         outputArea.setFont(new Font("SansSerif", Font.PLAIN, 13));
-        outputArea.setBackground(Color.BLACK);
+        outputArea.setOpaque(false);
         outputArea.setForeground(Color.GREEN);
         outputArea.setLineWrap(true);
         outputArea.setWrapStyleWord(true);
         outputArea.setMargin(new Insets(10, 12, 10, 12));
 
         JScrollPane scroll = new JScrollPane(outputArea);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
         scroll.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 2));
         scroll.getVerticalScrollBar().setUnitIncrement(16);
 
@@ -114,6 +118,15 @@ public class CombatGameGUI
         enemyBars[0] = makeBar();
         enemyBars[1] = makeBar();
 
+        JLabel charImg1 = new JLabel();
+        JLabel charImg2 = new JLabel();
+        try {
+            Image i1 = javax.imageio.ImageIO.read(new java.io.File("character_1.png"));
+            Image i2 = javax.imageio.ImageIO.read(new java.io.File("character_2.png"));
+            charImg1.setIcon(new javax.swing.ImageIcon(i1.getScaledInstance(56, 56, Image.SCALE_SMOOTH)));
+            charImg2.setIcon(new javax.swing.ImageIcon(i2.getScaledInstance(56, 56, Image.SCALE_SMOOTH)));
+        } catch (IOException ex) { ex.printStackTrace(); }
+
         JLabel yourLabel = new JLabel("YOUR TEAM:");
         yourLabel.setForeground(Color.WHITE);
         yourLabel.setFont(new Font("SansSerif", Font.BOLD, 13));
@@ -124,20 +137,34 @@ public class CombatGameGUI
 
         hpPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 8));
         hpPanel.setBackground(Color.BLACK);
-        hpPanel.setPreferredSize(new Dimension(940, 48));
+        hpPanel.setPreferredSize(new Dimension(940, 80));
+        hpPanel.add(charImg1);
         hpPanel.add(yourLabel);
         hpPanel.add(playerBars[0]);
         hpPanel.add(playerBars[1]);
         hpPanel.add(enemyLabel);
         hpPanel.add(enemyBars[0]);
         hpPanel.add(enemyBars[1]);
+        hpPanel.add(charImg2);
 
         JPanel bottom = new JPanel(new BorderLayout());
         bottom.setBackground(Color.BLACK);
         bottom.add(hpPanel, BorderLayout.NORTH);
         bottom.add(buttonPanel, BorderLayout.SOUTH);
 
-        JPanel root = new JPanel(new BorderLayout());
+        Image loadedBg = null;
+        try { loadedBg = javax.imageio.ImageIO.read(new java.io.File("background.png")); }
+        catch (IOException ex) { ex.printStackTrace(); }
+        final Image bgImage = loadedBg;
+        JPanel root = new JPanel(new BorderLayout())
+        {
+            @Override
+            protected void paintComponent(Graphics g)
+            {
+                super.paintComponent(g);
+                if (bgImage != null) g.drawImage(bgImage, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
         root.add(scroll, BorderLayout.CENTER);
         root.add(bottom, BorderLayout.SOUTH);
 
