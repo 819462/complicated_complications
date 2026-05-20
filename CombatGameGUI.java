@@ -29,13 +29,11 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /*
- * Same design as the previous one, just simplified, combined into one, and yeah!
- * WHY DID NOBODY TELL ME ALL THE ERRORS WERE DUE TO THE SAME METHODS IN DIFFERENT LIBRARIES.
- * I'm joking. But anyway, enjoy it! Eesh this took a LOT of time and help to do :|
+ * Modified version that uses GameSetupDialogs for character/item selection.
+ * Main game screen now only shows combat phases, keeping output clean.
  */
 
 public class CombatGameGUI
@@ -49,11 +47,8 @@ public class CombatGameGUI
     static PipedOutputStream toGame;
     static StringBuilder output = new StringBuilder();
     static Timer debounce;
-
-    static List<String> availChars = new ArrayList<>(Arrays.asList("Knight", "Robot", "Witch"));
-    static List<String> availItems = new ArrayList<>(Arrays.asList("Shield", "Potion", "Knife", "Boots", "Blow Dart"));
-    static int charCount = 0;
-    static int itemCount = 0;
+    
+    static GameSetupDialogs.GameSelections selections;
 
     public static void main(String[] args)
     {
@@ -94,6 +89,14 @@ public class CombatGameGUI
 
     static void setupGameScreen()
     {
+        // First, run the setup dialogs to get character and item selections
+        selections = GameSetupDialogs.runSetup(frame);
+        
+        if (selections == null) {
+            // User cancelled setup
+            return;
+        }
+        
         outputArea = new JTextArea();
         outputArea.setEditable(false);
         outputArea.setFont(new Font("SansSerif", Font.PLAIN, 13));
@@ -258,6 +261,27 @@ public class CombatGameGUI
             Thread game = new Thread(new GameRunner(), "game");
             game.setDaemon(true);
             game.start();
+            
+            // Wait a bit for game to start, then auto-feed selections
+            new Thread(() -> {
+                try {
+                    Thread.sleep(500); // Let game initialize
+                    
+                    // Send character selections
+                    send(selections.char1Index + "\n");
+                    Thread.sleep(100);
+                    send(selections.char2Index + "\n");
+                    Thread.sleep(100);
+                    
+                    // Send item selections
+                    send(selections.item1Index + "\n");
+                    Thread.sleep(100);
+                    send(selections.item2Index + "\n");
+                    
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }).start();
         }
         catch (IOException e)
         {
@@ -348,52 +372,11 @@ public class CombatGameGUI
         {
             addTargetBtns("Attack ->");
         }
-        else if (last.equals("0) Description"))
-        {
-            if (charCount < 2)
-            {
-                addCharBtns();
-            }
-            else
-            {
-                addItemBtns();
-            }
-        }
+        // Note: We removed character and item selection button handling
+        // since those are now handled by GameSetupDialogs
 
         buttonPanel.revalidate();
         buttonPanel.repaint();
-    }
-
-    static void addCharBtns()
-    {
-        List<String> list = new ArrayList<>(availChars);
-        for (int i = 0; i < list.size(); i++)
-        {
-            String name = list.get(i);
-            int idx = i + 1;
-            JButton b = btn(name, 15);
-            b.addActionListener(new PickChar(b, idx, name));
-            buttonPanel.add(b);
-        }
-        JButton d = btn("Descriptions", 13);
-        d.addActionListener(new SendAction("0\n"));
-        buttonPanel.add(d);
-    }
-
-    static void addItemBtns()
-    {
-        List<String> list = new ArrayList<>(availItems);
-        for (int i = 0; i < list.size(); i++)
-        {
-            String name = list.get(i);
-            int idx = i + 1;
-            JButton b = btn(name, 14);
-            b.addActionListener(new PickItem(b, idx, name));
-            buttonPanel.add(b);
-        }
-        JButton d = btn("Descriptions", 13);
-        d.addActionListener(new SendAction("0\n"));
-        buttonPanel.add(d);
     }
 
     static void addActionBtns()
@@ -484,10 +467,30 @@ public class CombatGameGUI
                 String line;
                 while ((line = br.readLine()) != null)
                 {
-                    SwingUtilities.invokeLater(new UIUpdate(line));
+                    // Filter out character/item selection output to keep screen clean
+                    if (shouldDisplayLine(line)) {
+                        SwingUtilities.invokeLater(new UIUpdate(line));
+                    }
                 }
             }
             catch (IOException ignored) { }
+        }
+        
+        private boolean shouldDisplayLine(String line) {
+            // Filter out the initial selection prompts since we handle them via dialogs
+            String trimmed = line.trim();
+            
+            // Skip character selection prompts
+            if (trimmed.startsWith("Choose character") || 
+                trimmed.matches("\\d+\\) (Knight|Robot|Witch)") ||
+                trimmed.equals("0) Description") ||
+                trimmed.contains("choose item:") ||
+                trimmed.matches("\\d+\\) (Shield|Potion|Knife|Boots|Blow Dart)") ||
+                trimmed.startsWith("equipped ")) {
+                return false;
+            }
+            
+            return true;
         }
     }
 
@@ -563,50 +566,6 @@ public class CombatGameGUI
         {
             b.setEnabled(false);
             send("\n\n");
-        }
-    }
-
-    static class PickChar implements ActionListener
-    {
-        JButton b;
-        int idx;
-        String name;
-
-        PickChar(JButton b, int idx, String name)
-        {
-            this.b = b;
-            this.idx = idx;
-            this.name = name;
-        }
-
-        public void actionPerformed(ActionEvent e)
-        {
-            b.setEnabled(false);
-            send(idx + "\n");
-            availChars.remove(name);
-            charCount++;
-        }
-    }
-
-    static class PickItem implements ActionListener
-    {
-        JButton b;
-        int idx;
-        String name;
-
-        PickItem(JButton b, int idx, String name)
-        {
-            this.b = b;
-            this.idx = idx;
-            this.name = name;
-        }
-
-        public void actionPerformed(ActionEvent e)
-        {
-            b.setEnabled(false);
-            send(idx + "\n");
-            availItems.remove(name);
-            itemCount++;
         }
     }
 
